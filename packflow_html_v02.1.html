@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PackFlow v02.1 - Sistema de Gestão de Embalagens</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #003366 0%, #00A896 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #003366 0%, #00A896 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 5px;
+        }
+        
+        .header .subtitle {
+            opacity: 0.9;
+            font-size: 0.9em;
+        }
+        
+        .version-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            display: inline-block;
+            margin-top: 10px;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        /* Login Screen */
+        .login-screen {
+            text-align: center;
+        }
+        
+        .login-buttons {
+            display: grid;
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .login-btn {
+            background: linear-gradient(135deg, #003366 0%, #00A896 100%);
+            color: white;
+            border: none;
+            padding: 25px;
+            font-size: 1.3em;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+        
+        .login-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0,168,150,0.3);
+        }
+        
+        .login-btn:active {
+            transform: translateY(0);
+        }
+        
+        /* Common Elements */
+        .hidden {
+            display: none !important;
+        }
+        
+        .btn {
+            background: #00A896;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .btn:hover {
+            background: #008876;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: #003366;
+        }
+        
+        .btn-secondary:hover {
+            background: #002244;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+        }
+        
+        .btn-warning {
+            background: #ffa500;
+        }
+        
+        .btn-success {
+            background: #28a745;
+        }
+        
+        .btn-cancel {
+            background: #6c757d;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #003366;
+            font-weight: bold;
+        }
+        
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+        
+        select:focus {
+            outline: none;
+            border-color: #00A896;
+        }
+        
+        /* Machine Buttons Grid - NOVO! */
+        .machine-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .machine-btn {
+            background: #f8f9fa;
+            border: 2px solid #003366;
+            color: #003366;
+            padding: 15px 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+        
+        .machine-btn:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+        }
+        
+        .machine-btn.selected {
+            background: linear-gradient(135deg, #003366 0%, #00A896 100%);
+            color: white;
+            border-color: #00A896;
+        }
+        
+        /* Mizu Screen */
+        .mizu-form {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .submit-btn {
+            width: 100%;
+            padding: 20px;
+            font-size: 1.2em;
+            margin-top: 20px;
+        }
+        
+        .recent-requests {
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid #eee;
+        }
+        
+        .recent-requests h3 {
+            color: #003366;
+            margin-bottom: 15px;
+        }
+        
+        /* Separador Screen */
+        .filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            align-items: center;
+        }
+        
+        .filters select {
+            flex: 1;
+        }
+        
+        .counters {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .counter {
+            background: linear-gradient(135deg, #003366 0%, #00A896 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .counter.alert {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        }
+        
+        .counter-number {
+            font-size: 2.5em;
+            font-weight: bold;
+        }
+        
+        .counter-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+        
+        /* Request Cards */
+        .request-card {
+            background: #f8f9fa;
+            border-left: 5px solid #00A896;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+        
+        .request-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .request-card.rota-1 {
+            border-left-color: #003366;
+        }
+        
+        .request-card.rota-2 {
+            border-left-color: #00A896;
+        }
+        
+        .request-card.cancelada {
+            opacity: 0.6;
+            background: #f5f5f5;
+        }
+        
+        .request-card.indisponivel {
+            border-left-color: #ffa500;
+            background: #fff3cd;
+        }
+        
+        .request-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .request-rota {
+            background: #003366;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+        
+        .request-rota.rota-2 {
+            background: #00A896;
+        }
+        
+        .request-time {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .request-time.urgent {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        
+        .request-body {
+            margin-bottom: 15px;
+        }
+        
+        .request-detail {
+            display: flex;
+            margin-bottom: 8px;
+        }
+        
+        .detail-label {
+            font-weight: bold;
+            color: #003366;
+            min-width: 120px;
+        }
+        
+        .detail-value {
+            color: #333;
+        }
+        
+        .detail-value.cliente {
+            color: #00A896;
+            font-weight: 600;
+        }
+        
+        .request-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .request-actions button {
+            flex: 1;
+            min-width: 120px;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+        
+        .status-pendente {
+            background: #dc3545;
+            color: white;
+            font-size: 1.1em;
+            padding: 10px 18px;
+            box-shadow: 0 2px 8px rgba(220,53,69,0.3);
+        }
+        
+        .status-em-separacao {
+            background: #ffa500;
+            color: white;
+            font-size: 1.1em;
+            padding: 10px 18px;
+            box-shadow: 0 2px 8px rgba(255,165,0,0.3);
+        }
+        
+        .status-pronto {
+            background: #28a745;
+            color: white;
+            font-size: 1.1em;
+            padding: 10px 18px;
+            box-shadow: 0 2px 8px rgba(40,167,69,0.3);
+        }
+        
+        .status-entregue {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .status-cancelada {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .status-removida {
+            background: #dc3545;
+            color: white;
+            text-decoration: line-through;
+        }
+        
+        .status-indisponivel {
+            background: #ffa500;
+            color: #000;
+            font-size: 1.1em;
+            padding: 10px 18px;
+            box-shadow: 0 2px 8px rgba(255,165,0,0.3);
+            border: 2px solid #ff8c00;
+        }
+        
+        .logout-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.3);
+            transition: all 0.3s;
+        }
+        
+        .logout-btn:hover {
+            background: #c82333;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(220, 53, 69, 0.4);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+        
+        .empty-state-icon {
+            font-size: 4em;
+            margin-bottom: 15px;
+        }
+        
+        /* Auto-refresh indicator */
+        .refresh-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            font-size: 0.9em;
+            color: #666;
+        }
+        
+        .refresh-indicator.active {
+            background: #28a745;
+            color: white;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                border-radius: 0;
+            }
+            
+            .counters {
+                grid-template-columns: 1fr;
+            }
+            
+            .filters {
+                flex-direction: column;
+            }
+            
+            .request-actions {
+                flex-direction: column;
+            }
+            
+            .request-actions button {
+                width: 100%;
+            }
+            
+            .machine-grid {
+                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Login Screen -->
+        <div id="loginScreen">
+            <div class="header">
+                <h1>📦 PackFlow</h1>
+                <p class="subtitle">Sistema de Gestão de Embalagens</p>
+                <span class="version-badge">v02.1</span>
+            </div>
+            <div class="content login-screen">
+                <h2 style="color: #003366; margin-bottom: 30px;">Selecione seu perfil:</h2>
+                <div class="login-buttons">
+                    <button class="login-btn" onclick="login('mizu1')">
+                        🚚 Mizu Rota 1
+                    </button>
+                    <button class="login-btn" onclick="login('mizu2')">
+                        🚚 Mizu Rota 2
+                    </button>
+                    <button class="login-btn" onclick="login('separador')">
+                        📦 Separador
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mizu Rota 1 Screen -->
+        <div id="mizu1Screen" class="hidden">
+            <div class="header">
+                <h1>🚚 Mizu Rota 1</h1>
+                <p class="subtitle">Solicitação de Embalagens</p>
+                <span class="version-badge">v02.1</span>
+            </div>
+            <div class="content">
+                <form class="mizu-form" onsubmit="submitRequest('Rota 1'); return false;">
+                    <div class="form-group">
+                        <label>Máquina: <span id="mizu1SelectedMachine" style="color: #00A896;"></span></label>
+                        <div id="mizu1MachineGrid" class="machine-grid"></div>
+                        <input type="hidden" id="mizu1Maquina" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Modelo de Embalagem:</label>
+                        <select id="mizu1Embalagem" required>
+                            <option value="">Selecione a embalagem...</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Quantidade de Caixas:</label>
+                        <select id="mizu1Quantidade" required>
+                            <option value="">Selecione a quantidade...</option>
+                            <option value="1">1 caixa</option>
+                            <option value="2">2 caixas</option>
+                            <option value="3">3 caixas</option>
+                            <option value="4">4 caixas</option>
+                            <option value="5">5 caixas</option>
+                            <option value="6">6 caixas</option>
+                            <option value="7">7 caixas</option>
+                            <option value="8">8 caixas</option>
+                            <option value="9">9 caixas</option>
+                            <option value="10">10 caixas</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn submit-btn">SOLICITAR EMBALAGEM</button>
+                </form>
+                
+                <div class="recent-requests">
+                    <h3>Últimas Solicitações</h3>
+                    <div id="mizu1Recent"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mizu Rota 2 Screen -->
+        <div id="mizu2Screen" class="hidden">
+            <div class="header">
+                <h1>🚚 Mizu Rota 2</h1>
+                <p class="subtitle">Solicitação de Embalagens</p>
+                <span class="version-badge">v02.1</span>
+            </div>
+            <div class="content">
+                <form class="mizu-form" onsubmit="submitRequest('Rota 2'); return false;">
+                    <div class="form-group">
+                        <label>Máquina: <span id="mizu2SelectedMachine" style="color: #00A896;"></span></label>
+                        <div id="mizu2MachineGrid" class="machine-grid"></div>
+                        <input type="hidden" id="mizu2Maquina" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Modelo de Embalagem:</label>
+                        <select id="mizu2Embalagem" required>
+                            <option value="">Selecione a embalagem...</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Quantidade de Caixas:</label>
+                        <select id="mizu2Quantidade" required>
+                            <option value="">Selecione a quantidade...</option>
+                            <option value="1">1 caixa</option>
+                            <option value="2">2 caixas</option>
+                            <option value="3">3 caixas</option>
+                            <option value="4">4 caixas</option>
+                            <option value="5">5 caixas</option>
+                            <option value="6">6 caixas</option>
+                            <option value="7">7 caixas</option>
+                            <option value="8">8 caixas</option>
+                            <option value="9">9 caixas</option>
+                            <option value="10">10 caixas</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn submit-btn">SOLICITAR EMBALAGEM</button>
+                </form>
+                
+                <div class="recent-requests">
+                    <h3>Últimas Solicitações</h3>
+                    <div id="mizu2Recent"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Separador Screen -->
+        <div id="separadorScreen" class="hidden">
+            <div class="header">
+                <h1>📦 Separador</h1>
+                <p class="subtitle">Gestão de Solicitações</p>
+                <span class="version-badge">v02.1</span>
+            </div>
+            <div class="content">
+                <div class="filters">
+                    <select id="routeFilter" onchange="updateSeparadorView()">
+                        <option value="all">Todas as Rotas</option>
+                        <option value="Rota 1">Rota 1</option>
+                        <option value="Rota 2">Rota 2</option>
+                    </select>
+                    <button class="btn btn-secondary" onclick="updateSeparadorView()">🔄 Atualizar</button>
+                </div>
+                
+                <div class="counters">
+                    <div class="counter" id="counter1">
+                        <div class="counter-number">0</div>
+                        <div class="counter-label">Rota 1 - Pendentes</div>
+                    </div>
+                    <div class="counter" id="counter2">
+                        <div class="counter-number">0</div>
+                        <div class="counter-label">Rota 2 - Pendentes</div>
+                    </div>
+                </div>
+                
+                <div id="requestsList"></div>
+            </div>
+        </div>
+    </div>
+
+    <button class="logout-btn hidden" id="logoutBtn" onclick="logout()">🚪 Sair</button>
+    <div class="refresh-indicator hidden" id="refreshIndicator">⏱️ Atualizando...</div>
+
+    <script>
+        // Dados mestres com CLIENTE - ATUALIZADO v02!
+        const masterData = {
+            'Rota 1': {
+                'IN4': [
+                    { embalagem: 'Rosa / Col. C Sup. 5HD', cliente: 'Hyundai BR2' },
+                    { embalagem: 'Ama.- Pret./ Col. B Sup', cliente: 'Hyundai BR2' },
+                    { embalagem: 'Branco / Col A Sup.', cliente: 'Hyundai SU2B' },
+                    { embalagem: 'COL A SUP', cliente: 'NISSAN P13C' },
+                    { embalagem: 'COL B SUP - KLT 05', cliente: 'NISSAN P13C' }
+                ],
+                'IN5': [
+                    { embalagem: 'Verm. / Col. A Sup. D/E', cliente: 'Hyundai BR2' }
+                ],
+                'IE3': [
+                    { embalagem: 'Verme. Bran. / Col. C Inf.', cliente: 'Hyundai BR2' },
+                    { embalagem: 'GLT - G1A01 / Col. C Inf.', cliente: 'NISSAN P02H' }
+                ],
+                'IE6': [
+                    { embalagem: 'Verde / Col. B Inf.', cliente: 'Hyundai SU2B' },
+                    { embalagem: 'CX - 6 / Col. C Inf. D/E', cliente: 'GM' },
+                    { embalagem: 'CX - 4 / Col. B Inf. D/E', cliente: 'GM' },
+                    { embalagem: 'Rack - 30-122 / Painel - Back Pai.', cliente: 'GM' }
+                ],
+                'IN6': [
+                    { embalagem: 'Azul / Transverse', cliente: 'Hyundai SU2B' },
+                    { embalagem: 'BACK DOOR', cliente: 'NISSAN P13C' }
+                ],
+                'IR2': [
+                    { embalagem: 'GLT - G1P02 / Col. A Inf.', cliente: 'NISSAN P02H' },
+                    { embalagem: 'CX MID PNL TEXTURIZADO', cliente: 'HONDA' },
+                    { embalagem: 'MASK LUG - CX 06', cliente: 'NISSAN P13C' }
+                ],
+                'IK1': [
+                    { embalagem: 'GLT - G3P01 / Col. B Inf.', cliente: 'NISSAN P02H' }
+                ],
+                'IE2': [
+                    { embalagem: 'GLT - G2P15 / Plate Lug', cliente: 'NISSAN P02H' },
+                    { embalagem: 'RACK COB. PORTA MALA 5/4 P. - 86640', cliente: 'HONDA' }
+                ],
+                'ITC1': [
+                    { embalagem: 'Caixa - 07 / Botoeira', cliente: 'NISSAN P02H' },
+                    { embalagem: 'CX PULL POCKT 2TG', cliente: 'HONDA' }
+                ],
+                'IN8': [
+                    { embalagem: 'CX - 5 / Col. B Inf. CS', cliente: 'GM' },
+                    { embalagem: 'Rack - 30-1481 / Lift Gate', cliente: 'GM' },
+                    { embalagem: 'RACK TAILGATE 2TG - 84431', cliente: 'HONDA' },
+                    { embalagem: 'RACK TAILGATE INF. 2GN - 84431', cliente: 'HONDA' },
+                    { embalagem: 'TAIL GATE', cliente: 'HONDA 39KZ' }
+                ],
+                'IK2': [
+                    { embalagem: 'GLT -', cliente: 'VW' },
+                    { embalagem: 'PLATE LUG', cliente: 'NISSAN P13C' }
+                ],
+                'KN1': [
+                    { embalagem: 'COL B INF - PÉ ROSA', cliente: 'NISSAN P13C' },
+                    { embalagem: 'COL C SUP - PÉ VERDE', cliente: 'NISSAN P13C' }
+                ],
+                'KN2': [
+                    { embalagem: 'COL C INF - PÉ BRANCO', cliente: 'NISSAN P13C' }
+                ],
+                'ITC2': [
+                    { embalagem: 'BRKT LUG - CX 07', cliente: 'NISSAN P13C' }
+                ],
+                'IN10': [
+                    { embalagem: 'TRUNK SIDE', cliente: 'HONDA 39KZ' }
+                ]
+            },
+            'Rota 2': {
+                'IN9': [
+                    { embalagem: 'Cinza / Col. B Inf.', cliente: 'Hyundai BR2' },
+                    { embalagem: 'CX - 10 / Conj. END TRIM 31UX', cliente: 'GM' }
+                ],
+                'IN7': [
+                    { embalagem: 'Amarelo / Soleira T.', cliente: 'Hyundai BR2' },
+                    { embalagem: 'Verde / Soleira Diant.', cliente: 'Hyundai BR2' },
+                    { embalagem: 'Preto / Soleira Tras.', cliente: 'Hyundai SU2B' },
+                    { embalagem: 'Preto / Soleira Diant.', cliente: 'Hyundai SU2B' },
+                    { embalagem: 'Rack - 138 / Col. C 23X', cliente: 'VW' },
+                    { embalagem: 'SOLEIRA DIANT - PÉ MARROM', cliente: 'NISSAN P13C' },
+                    { embalagem: 'SOLEIRA TRAS - CX 08', cliente: 'NISSAN P13C' }
+                ],
+                'IN3': [
+                    { embalagem: 'Vermelho / Col A INF.', cliente: 'Hyundai BR2' },
+                    { embalagem: 'Azul / Col. A Inf.', cliente: 'Hyundai SU2B' },
+                    { embalagem: 'COL A INF - PÉ AMARELO', cliente: 'NISSAN P13C' }
+                ],
+                'IN2': [
+                    { embalagem: 'Ama. Col. C Sup. 4HD', cliente: 'Hyundai BR2' },
+                    { embalagem: 'Vermelho / Col. C Sup.', cliente: 'Hyundai SU2B' },
+                    { embalagem: 'Amarelo / Col. B Sup', cliente: 'Hyundai SU2B' },
+                    { embalagem: 'Caixa - 05 / Col. B Sup. Nissan', cliente: 'NISSAN P02H' },
+                    { embalagem: 'CX - 2 / Col. B Sup. 31UX D/E', cliente: 'GM' }
+                ],
+                'IN1': [
+                    { embalagem: 'Caixa - 07 / Soleira Nissan - DIANT', cliente: 'NISSAN P02H' },
+                    { embalagem: 'CX- 9 / Soleira 31UX D/E', cliente: 'GM' },
+                    { embalagem: 'SOLEIRA 2TG', cliente: 'HONDA' },
+                    { embalagem: 'RACK TAILGATE LAT. 2GN - 84435/84485', cliente: 'HONDA' },
+                    { embalagem: 'RACK TAILGATE SUP. 2GN - 84433', cliente: 'HONDA' }
+                ],
+                'IE1': [
+                    { embalagem: 'CX - 7 / Col. a Inf. D/E', cliente: 'GM' }
+                ]
+            }
+        };
+
+        let currentUser = null;
+        let requests = [];
+        let requestIdCounter = 1;
+        let selectedMachine = { mizu1: '', mizu2: '' };
+
+        // Initialize
+        function init() {
+            loadRequests();
+            populateMachineButtons();
+            populateEmbalagens();
+            
+            // Exemplo de solicitações
+            if (requests.length === 0) {
+                addExampleRequests();
+            }
+        }
+
+        function addExampleRequests() {
+            const examples = [
+                { rota: 'Rota 1', maquina: 'IN4', embalagem: 'Rosa / Col. C Sup. 5HD', cliente: 'Hyundai BR2', quantidade: 3, timestamp: Date.now() - 600000 },
+                { rota: 'Rota 2', maquina: 'IN7', embalagem: 'Verde / Soleira Diant.', cliente: 'Hyundai BR2', quantidade: 5, timestamp: Date.now() - 300000 }
+            ];
+            
+            examples.forEach(ex => {
+                requests.push({
+                    id: requestIdCounter++,
+                    ...ex,
+                    status: 'Pendente',
+                    solicitadoPor: ex.rota === 'Rota 1' ? 'Mizu Rota 1' : 'Mizu Rota 2'
+                });
+            });
+            
+            saveRequests();
+        }
+
+        // NOVO v02: Criar botões de máquinas
+        function populateMachineButtons() {
+            const mizu1Grid = document.getElementById('mizu1MachineGrid');
+            const mizu2Grid = document.getElementById('mizu2MachineGrid');
+            
+            // Rota 1
+            Object.keys(masterData['Rota 1']).sort().forEach(machine => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'machine-btn';
+                btn.textContent = machine;
+                btn.onclick = () => selectMachine('mizu1', machine);
+                mizu1Grid.appendChild(btn);
+            });
+            
+            // Rota 2
+            Object.keys(masterData['Rota 2']).sort().forEach(machine => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'machine-btn';
+                btn.textContent = machine;
+                btn.onclick = () => selectMachine('mizu2', machine);
+                mizu2Grid.appendChild(btn);
+            });
+        }
+
+        // NOVO v02: Selecionar máquina via botão
+        function selectMachine(mizu, machine) {
+            selectedMachine[mizu] = machine;
+            document.getElementById(mizu + 'Maquina').value = machine;
+            document.getElementById(mizu + 'SelectedMachine').textContent = machine;
+            
+            // Atualizar visual dos botões
+            const grid = document.getElementById(mizu + 'MachineGrid');
+            Array.from(grid.children).forEach(btn => {
+                btn.classList.toggle('selected', btn.textContent === machine);
+            });
+            
+            // Atualizar embalagens
+            updateEmbalagens(mizu);
+        }
+
+        // NOVO v02: Popular embalagens com cliente
+        function populateEmbalagens() {
+            const mizu1Select = document.getElementById('mizu1Embalagem');
+            const mizu2Select = document.getElementById('mizu2Embalagem');
+            
+            // Rota 1 - todas embalagens com cliente
+            const embalagens1 = [];
+            Object.values(masterData['Rota 1']).forEach(list => {
+                list.forEach(item => embalagens1.push(item));
+            });
+            
+            embalagens1.sort((a, b) => a.embalagem.localeCompare(b.embalagem)).forEach(item => {
+                const option = document.createElement('option');
+                option.value = JSON.stringify(item);
+                option.textContent = `${item.embalagem} - ${item.cliente}`;
+                mizu1Select.appendChild(option);
+            });
+            
+            // Rota 2
+            const embalagens2 = [];
+            Object.values(masterData['Rota 2']).forEach(list => {
+                list.forEach(item => embalagens2.push(item));
+            });
+            
+            embalagens2.sort((a, b) => a.embalagem.localeCompare(b.embalagem)).forEach(item => {
+                const option = document.createElement('option');
+                option.value = JSON.stringify(item);
+                option.textContent = `${item.embalagem} - ${item.cliente}`;
+                mizu2Select.appendChild(option);
+            });
+        }
+
+        function updateEmbalagens(mizu) {
+            // Não precisa mais filtrar, já mostra todas
+            // Função mantida para compatibilidade futura
+        }
+
+        function login(userType) {
+            currentUser = userType;
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('logoutBtn').classList.remove('hidden');
+            
+            if (userType === 'mizu1') {
+                document.getElementById('mizu1Screen').classList.remove('hidden');
+                updateMizuRecent('mizu1');
+            } else if (userType === 'mizu2') {
+                document.getElementById('mizu2Screen').classList.remove('hidden');
+                updateMizuRecent('mizu2');
+            } else {
+                document.getElementById('separadorScreen').classList.remove('hidden');
+                updateSeparadorView();
+                startAutoRefresh();
+            }
+        }
+
+        function logout() {
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('mizu1Screen').classList.add('hidden');
+            document.getElementById('mizu2Screen').classList.add('hidden');
+            document.getElementById('separadorScreen').classList.add('hidden');
+            document.getElementById('logoutBtn').classList.add('hidden');
+            stopAutoRefresh();
+            currentUser = null;
+            selectedMachine = { mizu1: '', mizu2: '' };
+        }
+
+        function submitRequest(rota) {
+            const prefix = rota === 'Rota 1' ? 'mizu1' : 'mizu2';
+            const maquina = document.getElementById(prefix + 'Maquina').value;
+            const embalagemData = JSON.parse(document.getElementById(prefix + 'Embalagem').value);
+            const quantidade = document.getElementById(prefix + 'Quantidade').value;
+            
+            const request = {
+                id: requestIdCounter++,
+                rota: rota,
+                maquina: maquina,
+                embalagem: embalagemData.embalagem,
+                cliente: embalagemData.cliente,
+                quantidade: parseInt(quantidade),
+                status: 'Pendente',
+                timestamp: Date.now(),
+                solicitadoPor: rota === 'Rota 1' ? 'Mizu Rota 1' : 'Mizu Rota 2'
+            };
+            
+            requests.push(request);
+            saveRequests();
+            
+            // Reset form
+            selectedMachine[prefix] = '';
+            document.getElementById(prefix + 'Maquina').value = '';
+            document.getElementById(prefix + 'SelectedMachine').textContent = '';
+            document.getElementById(prefix + 'Embalagem').value = '';
+            document.getElementById(prefix + 'Quantidade').value = '';
+            
+            // Reset botões
+            const grid = document.getElementById(prefix + 'MachineGrid');
+            Array.from(grid.children).forEach(btn => btn.classList.remove('selected'));
+            
+            showNotification('✅ Solicitação enviada ao Separador!');
+            updateMizuRecent(prefix);
+        }
+
+        function updateMizuRecent(prefix) {
+            const rota = prefix === 'mizu1' ? 'Rota 1' : 'Rota 2';
+            const container = document.getElementById(prefix + 'Recent');
+            
+            const userRequests = requests
+                .filter(r => r.rota === rota && r.status !== 'Entregue')
+                .sort((a, b) => b.timestamp - a.timestamp)
+                .slice(0, 5);
+            
+            if (userRequests.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📭</div><p>Nenhuma solicitação recente</p></div>';
+                return;
+            }
+            
+            container.innerHTML = userRequests.map(req => `
+                <div class="request-card ${req.rota === 'Rota 1' ? 'rota-1' : 'rota-2'} ${req.status === 'Cancelada' ? 'cancelada' : ''} ${req.status === 'Indisponível' ? 'indisponivel' : ''}">
+                    <div class="request-header">
+                        <span class="status-badge status-${req.status.toLowerCase().replace(' ', '-')}">${req.status}</span>
+                        <span class="request-time">${formatTime(req.timestamp)}</span>
+                    </div>
+                    <div class="request-body">
+                        <div class="request-detail">
+                            <span class="detail-label">Máquina:</span>
+                            <span class="detail-value">${req.maquina}</span>
+                        </div>
+                        <div class="request-detail">
+                            <span class="detail-label">Cliente:</span>
+                            <span class="detail-value cliente">${req.cliente}</span>
+                        </div>
+                        <div class="request-detail">
+                            <span class="detail-label">Embalagem:</span>
+                            <span class="detail-value">${req.embalagem}</span>
+                        </div>
+                        <div class="request-detail">
+                            <span class="detail-label">Quantidade:</span>
+                            <span class="detail-value">${req.quantidade} ${req.quantidade === 1 ? 'caixa' : 'caixas'}</span>
+                        </div>
+                    </div>
+                    ${req.status === 'Pendente' || req.status === 'Em Separação' ? `
+                        <div class="request-actions">
+                            <button class="btn btn-cancel" onclick="cancelRequest(${req.id})">❌ Cancelar</button>
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+
+        // NOVO v02: Cancelar solicitação
+        function cancelRequest(id) {
+            if (!confirm('Deseja realmente cancelar esta solicitação?')) return;
+            
+            const request = requests.find(r => r.id === id);
+            if (request) {
+                request.status = 'Cancelada';
+                saveRequests();
+                updateMizuRecent(currentUser);
+                showNotification('❌ Solicitação cancelada');
+            }
+        }
+
+        function updateSeparadorView() {
+            const filter = document.getElementById('routeFilter').value;
+            const container = document.getElementById('requestsList');
+            
+            let filteredRequests = requests.filter(r => r.status !== 'Entregue' && r.status !== 'Cancelada' && r.status !== 'Removida');
+            
+            if (filter !== 'all') {
+                filteredRequests = filteredRequests.filter(r => r.rota === filter);
+            }
+            
+            filteredRequests.sort((a, b) => a.timestamp - b.timestamp);
+            
+            // Update counters
+            const rota1Count = requests.filter(r => r.rota === 'Rota 1' && (r.status === 'Pendente' || r.status === 'Em Separação')).length;
+            const rota2Count = requests.filter(r => r.rota === 'Rota 2' && (r.status === 'Pendente' || r.status === 'Em Separação')).length;
+            
+            document.querySelector('#counter1 .counter-number').textContent = rota1Count;
+            document.querySelector('#counter2 .counter-number').textContent = rota2Count;
+            
+            document.getElementById('counter1').classList.toggle('alert', rota1Count > 5);
+            document.getElementById('counter2').classList.toggle('alert', rota2Count > 5);
+            
+            if (filteredRequests.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">✅</div><p>Nenhuma solicitação pendente</p></div>';
+                return;
+            }
+            
+            container.innerHTML = filteredRequests.map(req => {
+                const elapsed = Math.floor((Date.now() - req.timestamp) / 60000);
+                const isUrgent = elapsed > 30;
+                
+                return `
+                    <div class="request-card ${req.rota === 'Rota 1' ? 'rota-1' : 'rota-2'} ${req.status === 'Indisponível' ? 'indisponivel' : ''}">
+                        <div class="request-header">
+                            <span class="request-rota ${req.rota === 'Rota 1' ? 'rota-1' : 'rota-2'}">${req.rota}</span>
+                            <span class="request-time ${isUrgent ? 'urgent' : ''}">${formatTime(req.timestamp)}</span>
+                        </div>
+                        <div class="request-body">
+                            <div class="request-detail">
+                                <span class="detail-label">Máquina:</span>
+                                <span class="detail-value">${req.maquina}</span>
+                            </div>
+                            <div class="request-detail">
+                                <span class="detail-label">Cliente:</span>
+                                <span class="detail-value cliente">${req.cliente}</span>
+                            </div>
+                            <div class="request-detail">
+                                <span class="detail-label">Embalagem:</span>
+                                <span class="detail-value">${req.embalagem}</span>
+                            </div>
+                            <div class="request-detail">
+                                <span class="detail-label">Quantidade:</span>
+                                <span class="detail-value" style="font-weight: bold; color: #003366; font-size: 1.1em;">${req.quantidade} ${req.quantidade === 1 ? 'caixa' : 'caixas'}</span>
+                            </div>
+                            <div class="request-detail">
+                                <span class="detail-label">Status:</span>
+                                <span class="status-badge status-${req.status.toLowerCase().replace(' ', '-')}">${req.status}</span>
+                            </div>
+                        </div>
+                        <div class="request-actions">
+                            ${req.status === 'Pendente' ? `
+                                <button class="btn btn-warning" onclick="updateStatus(${req.id}, 'Em Separação')">📦 Em Separação</button>
+                                <button class="btn btn-danger" onclick="updateStatus(${req.id}, 'Indisponível')">⚠️ Indisponível</button>
+                            ` : ''}
+                            ${req.status === 'Pendente' || req.status === 'Em Separação' ? `
+                                <button class="btn btn-success" onclick="updateStatus(${req.id}, 'Pronto')">✅ Pronto</button>
+                            ` : ''}
+                            ${req.status === 'Pronto' ? `
+                                <button class="btn btn-secondary" onclick="updateStatus(${req.id}, 'Entregue')">🚚 Entregue</button>
+                            ` : ''}
+                            ${req.status === 'Indisponível' ? `
+                                <button class="btn btn-warning" onclick="updateStatus(${req.id}, 'Pendente')">🔄 Voltar p/ Pendente</button>
+                                <button class="btn btn-danger" onclick="removeFromQueue(${req.id})">🗑️ Remover da Fila</button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // NOVO v02.1: Remover da fila
+        function removeFromQueue(id) {
+            if (!confirm('Deseja realmente REMOVER esta solicitação da fila?\n\nEla não aparecerá mais para o Separador, mas o Mizu ainda poderá vê-la como "Removida".')) return;
+            
+            const request = requests.find(r => r.id === id);
+            if (request) {
+                request.status = 'Removida';
+                saveRequests();
+                updateSeparadorView();
+                showNotification('🗑️ Solicitação removida da fila');
+            }
+        }
+
+        function updateStatus(id, newStatus) {
+            const request = requests.find(r => r.id === id);
+            if (request) {
+                request.status = newStatus;
+                saveRequests();
+                updateSeparadorView();
+                
+                let message = '';
+                switch(newStatus) {
+                    case 'Em Separação': message = '📦 Em separação'; break;
+                    case 'Pronto': message = '✅ Pronto para entrega'; break;
+                    case 'Entregue': message = '🚚 Entregue'; break;
+                    case 'Indisponível': message = '⚠️ Marcado como indisponível'; break;
+                    case 'Pendente': message = '🔄 Voltou para pendente'; break;
+                    default: message = `Status: ${newStatus}`;
+                }
+                
+                showNotification(message);
+            }
+        }
+
+        function formatTime(timestamp) {
+            const elapsed = Math.floor((Date.now() - timestamp) / 60000);
+            
+            if (elapsed < 1) return 'Agora';
+            if (elapsed < 60) return `${elapsed} min atrás`;
+            
+            const hours = Math.floor(elapsed / 60);
+            const minutes = elapsed % 60;
+            return `${hours}h${minutes}min atrás`;
+        }
+
+        function showNotification(message) {
+            const indicator = document.getElementById('refreshIndicator');
+            indicator.textContent = message;
+            indicator.classList.remove('hidden');
+            indicator.classList.add('active');
+            
+            setTimeout(() => {
+                indicator.classList.remove('active');
+                setTimeout(() => indicator.classList.add('hidden'), 300);
+            }, 3000);
+        }
+
+        let autoRefreshInterval;
+        
+        function startAutoRefresh() {
+            autoRefreshInterval = setInterval(() => {
+                if (currentUser === 'separador') {
+                    updateSeparadorView();
+                }
+            }, 10000);
+        }
+        
+        function stopAutoRefresh() {
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+            }
+        }
+
+        function saveRequests() {
+            localStorage.setItem('packflow_v02_requests', JSON.stringify(requests));
+            localStorage.setItem('packflow_v02_counter', requestIdCounter.toString());
+        }
+
+        function loadRequests() {
+            const saved = localStorage.getItem('packflow_v02_requests');
+            if (saved) {
+                requests = JSON.parse(saved);
+            }
+            
+            const counter = localStorage.getItem('packflow_v02_counter');
+            if (counter) {
+                requestIdCounter = parseInt(counter);
+            }
+        }
+
+        // Initialize on load
+        init();
+    </script>
+</body>
+</html>
